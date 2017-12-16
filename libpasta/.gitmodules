@@ -1,0 +1,3 @@
+[submodule "ext/pasta-bindings"]
+	path = ext/pasta-bindings
+	url = https://github.com/libpasta/pasta-bindings/
