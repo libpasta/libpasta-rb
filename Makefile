@@ -1,4 +1,4 @@
-all: libpasta-sync
+all: gem
 
 libpasta-sync:
 	git submodule update --init --recursive
@@ -7,5 +7,8 @@ ifneq ($(shell git -C libpasta/ext/pasta-bindings/ rev-parse --abbrev-ref HEAD),
 endif
 	make -C libpasta/ext/pasta-bindings libpasta-sync
 
+gem: libpasta-sync
+	cd libpasta && rake build && gem compile pkg/*
+	cd pasta_rails && rake test	
 
 .PHONY: libpasta-sync

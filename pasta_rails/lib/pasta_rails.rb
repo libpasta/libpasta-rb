@@ -13,15 +13,15 @@ module PastaRails
     module InstanceMethodsOnActivation
       def authenticate(unencrypted_password)
         @password_digest = self.password_digest
-        new_hash = Pasta.verify_password_update_hash(@password_digest, unencrypted_password)
-        if new_hash.empty?
-            false
-        else
+        res, new_hash = Pasta.verify_password_update_hash(@password_digest, unencrypted_password)
+        if res
             # Want to avoid database transaction if possible
             if !new_hash.eql? @password_digest
               self.update password_digest: new_hash
             end
             self
+        else
+            false
         end
       end
 
