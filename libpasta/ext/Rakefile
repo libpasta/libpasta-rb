@@ -1,9 +1,0 @@
-require 'thermite/tasks'
-
-# This runs the cargo build project on libpasta-capi and produces
-# lib/pasta.so (kind of annoyingly)
-# If we already have a system lib we don't need this I guess
-project_dir = File.dirname(File.dirname(__FILE__))
-Thermite::Tasks.new(cargo_project_path: "#{project_dir}/ext/pasta-bindings/libpasta/libpasta-capi/", ruby_project_path: project_dir)
-task default: %w(thermite:build)
-

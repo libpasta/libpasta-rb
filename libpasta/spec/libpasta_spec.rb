@@ -6,6 +6,6 @@ RSpec.describe Libpasta do
   end
 
   it "does something useful" do
-    expect(Pasta.hash_password "hello123").not_to be nil
+    expect(Pasta::hash_password "hello123").not_to be nil
   end
 end

@@ -31,8 +31,8 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should not update password on incorrect authenticate" do
-    @user.authenticate "letmein"
     digest = @user.password_digest
+    @user.authenticate "letmein"
     assert_equal(@user.password_digest, digest)
   end
 

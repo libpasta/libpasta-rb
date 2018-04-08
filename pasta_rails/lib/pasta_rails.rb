@@ -6,6 +6,19 @@ module PastaRails
     module ClassMethods
       def has_pasta_password(options = {})
         include InstanceMethodsOnActivation
+
+        include ActiveModel::Validations
+
+        # This ensures the model has a password by checking whether the password_digest
+        # is present, so that this works with both new and existing records. However,
+        # when there is an error, the message is added to the password attribute instead
+        # so that the error message will make sense to the end-user.
+        validate do |record|
+          record.errors.add(:password, :blank) unless record.password_digest.present?
+        end
+
+        validates_length_of :password, maximum: ActiveModel::SecurePassword::MAX_PASSWORD_LENGTH_ALLOWED
+        validates_confirmation_of :password, allow_blank: true
       end
 
     end
@@ -13,15 +26,16 @@ module PastaRails
     module InstanceMethodsOnActivation
       def authenticate(unencrypted_password)
         @password_digest = self.password_digest
-        res, new_hash = Pasta.verify_password_update_hash(@password_digest, unencrypted_password)
-        if res
-            # Want to avoid database transaction if possible
-            if !new_hash.eql? @password_digest
-              self.update password_digest: new_hash
-            end
-            self
+        res = Pasta.verify_password_update_hash(@password_digest, unencrypted_password)
+
+        case res.tag
+        when Pasta::HashUpdate::Updated
+            self.password_digest = res.updated
+            return true
+        when  Pasta::HashUpdate::Ok
+            return true
         else
-            false
+            return false
         end
       end
 

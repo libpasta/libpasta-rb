@@ -1,34 +1,16 @@
 require "bundler/gem_tasks"
 require "rspec/core/rake_task"
-require 'rake/clean'
-
-CLOBBER.include('lib/*{.so,.bundle}')
-
 
 RSpec::Core::RakeTask.new(:spec)
 
-task build: ["thermite:build", :build_ext]
-task :default => [:clobber, :build, :spec]
+task :default => [:build, :spec]
 
-require 'thermite/tasks'
-
-Thermite::Tasks.new(cargo_project_path: "ext/pasta-bindings/libpasta/libpasta-capi/")
-
-desc 'Run Rust & Ruby testsuites'
-task test: ['thermite:build', 'thermite:test'] do
-  # …
-end
-
-desc 'Build the libpasta C extension'  
-task :build_ext do
-  Dir.chdir("ext/pasta-bindings") do
-    sh "USE_STATIC=1 STATIC_LIBPASTA=libpasta/libpasta-capi/target/release/libpasta.a make ruby"
+desc 'Compile the extension from source ready for packaging'
+task :build_from_source do
+  cargo_dir = File.expand_path('../../../libpasta/libpasta-capi/', __FILE__)
+  pb_loc = File.expand_path('../../../pasta-bindings/', __FILE__)
+  Dir.chdir(pb_loc) do
+    sh "USE_STATIC=1 STATIC_LIBPASTA=#{cargo_dir}/target/release/libpasta.a make ruby"
   end
-  cp "ext/pasta-bindings/ruby/pasta.so", "lib/"
-end
-
-task :clean do
-  Dir.chdir("ext/pasta-bindings") do
-    sh "make clean"
-  end
+  cp "#{pb_loc}/ruby/pasta.so", "lib/"
 end
